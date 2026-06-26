@@ -10,16 +10,17 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0a0a0f;
-      --surface:  #12121a;
-      --border:   #1e1e2e;
-      --accent:   #6c63ff;
-      --accent2:  #a78bfa;
-      --text:     #e8e8f0;
-      --muted:    #6b6b8a;
-      --success:  #34d399;
-      --error:    #f87171;
-      --radius:   14px;
+      --bg:      #0a0a0f;
+      --surface: #12121a;
+      --border:  #1e1e2e;
+      --accent:  #6c63ff;
+      --accent2: #a78bfa;
+      --text:    #e8e8f0;
+      --muted:   #6b6b8a;
+      --success: #34d399;
+      --error:   #f87171;
+      --warn:    #fbbf24;
+      --radius:  14px;
     }
 
     html { scroll-behavior: smooth; }
@@ -34,7 +35,6 @@
       align-items: center;
     }
 
-    /* ── NOISE OVERLAY ── */
     body::before {
       content: '';
       position: fixed;
@@ -44,7 +44,6 @@
       z-index: 0;
     }
 
-    /* ── GLOW ── */
     .glow-orb {
       position: fixed;
       width: 600px;
@@ -58,7 +57,6 @@
       z-index: 0;
     }
 
-    /* ── LAYOUT ── */
     .wrapper {
       position: relative;
       z-index: 1;
@@ -70,11 +68,7 @@
       align-items: center;
     }
 
-    /* ── HEADER ── */
-    header {
-      margin-top: 72px;
-      text-align: center;
-    }
+    header { margin-top: 72px; text-align: center; }
 
     .logo {
       font-family: 'Space Mono', monospace;
@@ -90,16 +84,15 @@
     }
 
     .logo-dot {
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--accent);
       animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.4; transform:scale(0.7); }
     }
 
     h1 {
@@ -117,13 +110,11 @@
     .subtitle {
       color: var(--muted);
       font-size: 15px;
-      font-weight: 400;
       line-height: 1.6;
       max-width: 420px;
       margin: 0 auto;
     }
 
-    /* ── PLATFORMS ── */
     .platforms {
       display: flex;
       flex-wrap: wrap;
@@ -142,10 +133,9 @@
       border-radius: 6px;
       color: var(--muted);
       background: var(--surface);
-      transition: all 0.2s;
     }
 
-    /* ── INPUT CARD ── */
+    /* ── CARD ── */
     .card {
       width: 100%;
       background: var(--surface);
@@ -175,10 +165,7 @@
     }
 
     .url-input::placeholder { color: var(--muted); }
-
-    .url-input:focus {
-      border-color: var(--accent);
-    }
+    .url-input:focus { border-color: var(--accent); }
 
     .btn-fetch {
       background: var(--accent);
@@ -201,7 +188,24 @@
     .btn-fetch:active { transform: translateY(0); }
     .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* OPTIONS ROW */
+    .paste-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    kbd {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+    }
+
     .options-row {
       display: flex;
       gap: 12px;
@@ -209,10 +213,7 @@
       flex-wrap: wrap;
     }
 
-    .select-wrap {
-      flex: 1;
-      min-width: 130px;
-    }
+    .select-wrap { flex: 1; min-width: 130px; }
 
     .select-wrap label {
       display: block;
@@ -229,7 +230,7 @@
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 9px 12px;
+      padding: 9px 30px 9px 12px;
       color: var(--text);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 13px;
@@ -240,17 +241,102 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 10px center;
-      padding-right: 30px;
     }
 
     select:focus { border-color: var(--accent); }
 
-    /* ── STATUS ── */
-    .status {
-      margin-top: 20px;
-      display: none;
+    /* ── INSTANCE SECTION ── */
+    .instance-toggle {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      width: fit-content;
     }
 
+    .instance-toggle span {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .instance-toggle:hover span { color: var(--accent2); }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .chevron.open { transform: rotate(180deg); }
+
+    .instance-panel {
+      display: none;
+      margin-top: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .instance-panel.open { display: block; }
+
+    .instance-panel p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .instance-panel p a {
+      color: var(--accent2);
+      text-decoration: none;
+    }
+
+    .instance-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .instance-input:focus { border-color: var(--accent); }
+    .instance-input::placeholder { color: var(--muted); }
+
+    .instance-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .instance-preset {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.04em;
+    }
+
+    .instance-preset:hover { border-color: var(--accent); color: var(--accent2); }
+    .instance-preset.active { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,0.1); }
+
+    /* ── STATUS ── */
+    .status { margin-top: 20px; display: none; }
     .status.visible { display: block; }
 
     .status-inner {
@@ -280,9 +366,14 @@
       color: var(--success);
     }
 
+    .status-inner.warn {
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.25);
+      color: var(--warn);
+    }
+
     .spinner {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border: 2px solid rgba(108,99,255,0.3);
       border-top-color: var(--accent);
       border-radius: 50%;
@@ -355,17 +446,13 @@
       cursor: pointer;
       text-decoration: none;
       transition: all 0.2s;
+      margin-top: 8px;
     }
 
     .download-btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
 
-    .btn-arrow { font-size: 18px; }
-
     /* ── HOW IT WORKS ── */
-    .how {
-      width: 100%;
-      margin-top: 64px;
-    }
+    .how { width: 100%; margin-top: 64px; }
 
     .how-label {
       font-family: 'Space Mono', monospace;
@@ -378,11 +465,7 @@
       text-align: center;
     }
 
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 
     .step {
       background: var(--surface);
@@ -402,19 +485,9 @@
       margin-bottom: 10px;
     }
 
-    .step-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+    .step-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .step-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
-    .step-desc {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* ── FOOTER ── */
     footer {
       position: relative;
       z-index: 1;
@@ -430,25 +503,6 @@
 
     footer a { color: var(--accent2); text-decoration: none; }
 
-    /* ── PASTE HINT ── */
-    .paste-hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    kbd {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-    }
-
     @media (max-width: 520px) {
       .input-row { flex-direction: column; }
       .steps { grid-template-columns: 1fr; }
@@ -463,15 +517,10 @@
 
 <div class="wrapper">
 
-  <!-- HEADER -->
   <header>
-    <div class="logo">
-      <span class="logo-dot"></span>
-      VDROP
-    </div>
+    <div class="logo"><span class="logo-dot"></span>VDROP</div>
     <h1>Download<br/>Any Video</h1>
     <p class="subtitle">Paste a link from any platform and get the highest quality video — no login, no watermark, no limits.</p>
-
     <div class="platforms">
       <span class="platform-tag">YouTube</span>
       <span class="platform-tag">TikTok</span>
@@ -486,26 +535,23 @@
     </div>
   </header>
 
-  <!-- MAIN CARD -->
   <div class="card">
+
     <div class="input-row">
-      <input
-        class="url-input"
-        id="urlInput"
-        type="url"
-        placeholder="https://www.youtube.com/watch?v=..."
-        autocomplete="off"
-        spellcheck="false"
-      />
+      <input class="url-input" id="urlInput" type="url"
+        placeholder="https://x.com/... or youtube.com/..."
+        autocomplete="off" spellcheck="false" />
       <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
         Fetch
       </button>
     </div>
 
-    <div class="paste-hint">
-      <kbd>Ctrl</kbd>+<kbd>V</kbd> to paste — then hit Fetch
-    </div>
+    <div class="paste-hint"><kbd>Ctrl</kbd>+<kbd>V</kbd> to paste — then hit Fetch</div>
 
     <div class="options-row">
       <div class="select-wrap">
@@ -523,9 +569,9 @@
       <div class="select-wrap">
         <label>Mode</label>
         <select id="modeSelect">
-          <option value="auto">Auto (Video + Audio)</option>
+          <option value="auto">Video + Audio</option>
           <option value="audio">Audio Only (MP3)</option>
-          <option value="mute">Video Only (No Audio)</option>
+          <option value="mute">Video Only</option>
         </select>
       </div>
       <div class="select-wrap">
@@ -534,6 +580,29 @@
           <option value="mp4">MP4</option>
           <option value="webm">WebM</option>
         </select>
+      </div>
+    </div>
+
+    <!-- INSTANCE SELECTOR -->
+    <div class="instance-toggle" onclick="toggleInstance()">
+      <span class="chevron" id="chevron">▼</span>
+      <span>Advanced — change processing server</span>
+    </div>
+
+    <div class="instance-panel" id="instancePanel">
+      <p>
+        VDROP uses community-hosted <a href="https://instances.cobalt.best" target="_blank">Cobalt instances</a>.
+        If one fails, pick another. These are free public servers — no account needed.
+      </p>
+      <input class="instance-input" id="instanceInput"
+        placeholder="https://cobalt-api.kwiatekmiki.com"
+        value="https://cobalt-api.kwiatekmiki.com" />
+      <div class="instance-btns">
+        <button class="instance-preset active" onclick="setInstance(this, 'https://cobalt-api.kwiatekmiki.com')">kwiatekmiki</button>
+        <button class="instance-preset" onclick="setInstance(this, 'https://cobalt.api.timelessnesses.me')">timelessnesses</button>
+        <button class="instance-preset" onclick="setInstance(this, 'https://cobalt-us.kwiatekmiki.com')">kwiatekmiki-us</button>
+        <button class="instance-preset" onclick="setInstance(this, 'https://api.co.rooot.gay')">rooot</button>
+        <button class="instance-preset" onclick="setInstance(this, 'https://cobalt-backend.canine.tools')">canine</button>
       </div>
     </div>
 
@@ -547,6 +616,7 @@
       <div class="result-header">✓ Ready to download</div>
       <div class="result-body" id="resultBody"></div>
     </div>
+
   </div>
 
   <!-- HOW IT WORKS -->
@@ -573,25 +643,50 @@
 
 </div>
 
-<!-- FOOTER -->
 <footer>
-  Powered by <a href="https://cobalt.tools" target="_blank">cobalt.tools</a> API &nbsp;·&nbsp;
-  No data stored &nbsp;·&nbsp; Open source on <a href="https://github.com" target="_blank">GitHub</a>
+  Powered by <a href="https://cobalt.tools" target="_blank">cobalt.tools</a> open source API &nbsp;·&nbsp;
+  No data stored &nbsp;·&nbsp;
+  <a href="https://github.com/RMZIX/VDROP" target="_blank">GitHub</a>
 </footer>
 
 <script>
-  const COBALT_API = 'https://api.cobalt.tools';
+  // ── INSTANCES ──
+  const INSTANCES = [
+    'https://cobalt-api.kwiatekmiki.com',
+    'https://cobalt.api.timelessnesses.me',
+    'https://cobalt-us.kwiatekmiki.com',
+    'https://api.co.rooot.gay',
+    'https://cobalt-backend.canine.tools',
+  ];
 
-  // Auto-paste from clipboard on load if URL detected
+  function getInstance() {
+    return document.getElementById('instanceInput').value.trim() || INSTANCES[0];
+  }
+
+  function setInstance(btn, url) {
+    document.getElementById('instanceInput').value = url;
+    document.querySelectorAll('.instance-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function toggleInstance() {
+    const panel = document.getElementById('instancePanel');
+    const chevron = document.getElementById('chevron');
+    panel.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+
+  // ── AUTO-PASTE ──
   document.getElementById('urlInput').addEventListener('focus', async () => {
     try {
       const text = await navigator.clipboard.readText();
       if (text.startsWith('http') && !document.getElementById('urlInput').value) {
         document.getElementById('urlInput').value = text;
       }
-    } catch (e) {}
+    } catch(e) {}
   });
 
+  // ── FETCH WITH FALLBACK ──
   async function fetchVideo() {
     const url = document.getElementById('urlInput').value.trim();
     const quality = document.getElementById('qualitySelect').value;
@@ -599,81 +694,86 @@
     const vFormat = document.getElementById('formatSelect').value;
     const btn = document.getElementById('fetchBtn');
 
-    if (!url) {
-      showStatus('error', '✕ Please paste a video URL first.');
-      return;
-    }
-
-    if (!url.startsWith('http')) {
-      showStatus('error', '✕ That doesn\'t look like a valid URL. Make sure it starts with https://');
-      return;
-    }
+    if (!url) { showStatus('error', '✕ Paste a video URL first.'); return; }
+    if (!url.startsWith('http')) { showStatus('error', '✕ Invalid URL — must start with https://'); return; }
 
     hideResult();
     btn.disabled = true;
-    showStatus('loading', 'Fetching video link...');
+
+    const customInstance = document.getElementById('instanceInput').value.trim();
+    // Build list: custom first, then remaining fallbacks
+    const tryList = customInstance
+      ? [customInstance, ...INSTANCES.filter(i => i !== customInstance)]
+      : INSTANCES;
 
     const body = {
       url,
-      videoQuality: quality === 'max' ? 'max' : quality,
+      videoQuality: quality,
       youtubeVideoCodec: vFormat === 'webm' ? 'vp9' : 'h264',
       downloadMode: mode,
       filenameStyle: 'pretty',
-      disableMetadata: false,
     };
 
-    try {
-      const res = await fetch(`${COBALT_API}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+    let lastError = '';
 
-      const data = await res.json();
+    for (let i = 0; i < tryList.length; i++) {
+      const instance = tryList[i];
+      const label = instance.replace('https://', '');
+      showStatus('loading', `Trying ${label}${i > 0 ? ` (fallback ${i})` : ''}…`);
 
-      if (!res.ok || data.status === 'error') {
-        const msg = data?.error?.code || data?.text || 'Could not process this URL.';
-        showStatus('error', `✕ ${friendlyError(msg)}`);
-        btn.disabled = false;
-        return;
-      }
+      try {
+        const res = await fetch(`${instance}/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(body),
+        });
 
-      if (data.status === 'redirect' || data.status === 'stream') {
-        showStatus('success', '✓ Link resolved successfully.');
-        showResult(data.url, data.filename || getFilename(url, mode, vFormat));
-      } else if (data.status === 'picker') {
-        // Multiple streams (e.g. Twitter with multiple videos)
-        showStatus('success', `✓ Found ${data.picker.length} media items. Showing best option.`);
-        showResult(data.picker[0].url, data.picker[0].filename || getFilename(url, mode, vFormat), data.picker.slice(1));
-      } else if (data.status === 'tunnel') {
-        showStatus('success', '✓ Tunnel stream ready.');
-        showResult(data.url, data.filename || getFilename(url, mode, vFormat));
-      } else {
-        showStatus('error', '✕ Unexpected response from server. Try a different URL or quality.');
-      }
+        const data = await res.json();
 
-    } catch (err) {
-      if (err.message?.includes('fetch')) {
-        showStatus('error', '✕ Network error. Make sure you\'re online, or the Cobalt API may be temporarily down.');
-      } else {
-        showStatus('error', `✕ Error: ${err.message}`);
+        // Skip this instance if it requires auth
+        if (data?.error?.code?.includes('auth')) {
+          lastError = `${label} requires auth — trying next…`;
+          continue;
+        }
+
+        if (!res.ok || data.status === 'error') {
+          lastError = data?.error?.code || data?.text || 'Unknown error';
+          continue;
+        }
+
+        if (data.status === 'redirect' || data.status === 'stream' || data.status === 'tunnel') {
+          showStatus('success', `✓ Resolved via ${label}`);
+          showResult(data.url, data.filename || getFilename(url, mode, vFormat));
+          btn.disabled = false;
+          return;
+        }
+
+        if (data.status === 'picker') {
+          showStatus('success', `✓ Found ${data.picker.length} items via ${label}`);
+          showResult(data.picker[0].url, data.picker[0].filename || getFilename(url, mode, vFormat), data.picker.slice(1));
+          btn.disabled = false;
+          return;
+        }
+
+      } catch(err) {
+        lastError = `${label} unreachable`;
+        continue;
       }
     }
 
+    // All failed
+    showStatus('error', `✕ All servers failed. Last error: ${friendlyError(lastError)}. Try a different server in Advanced settings.`);
     btn.disabled = false;
   }
 
   function friendlyError(code) {
     const map = {
-      'content.too_long': 'The video is too long to process.',
-      'content.video.unavailable': 'This video is unavailable or private.',
-      'fetch.fail': 'Couldn\'t reach this URL. It may be private or region-locked.',
-      'link.unsupported': 'This platform isn\'t supported yet.',
-      'api.rate_exceeded': 'Too many requests. Wait a moment and try again.',
-      'content.post.unavailable': 'This post is unavailable.',
+      'content.too_long': 'Video is too long.',
+      'content.video.unavailable': 'Video is unavailable or private.',
+      'fetch.fail': 'Couldn\'t reach this URL — it may be private or region-locked.',
+      'link.unsupported': 'This platform isn\'t supported.',
+      'api.rate_exceeded': 'Rate limit hit — wait a moment and retry.',
+      'content.post.unavailable': 'Post is unavailable.',
     };
     return map[code] || code;
   }
@@ -686,15 +786,11 @@
   function showStatus(type, message) {
     const box = document.getElementById('statusBox');
     const inner = document.getElementById('statusInner');
-
     box.classList.add('visible');
     inner.className = `status-inner ${type}`;
-
-    if (type === 'loading') {
-      inner.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
-    } else {
-      inner.innerHTML = `<span>${message}</span>`;
-    }
+    inner.innerHTML = type === 'loading'
+      ? `<div class="spinner"></div><span>${message}</span>`
+      : `<span>${message}</span>`;
   }
 
   function hideResult() {
@@ -709,12 +805,8 @@
     let html = `
       <a class="download-btn" href="${primaryUrl}" download="${filename}" target="_blank">
         <span>⬇ Download — ${filename}</span>
-        <span class="btn-arrow">↗</span>
+        <span>↗</span>
       </a>
-    `;
-
-    // If browser blocks direct download (cross-origin), show copy link fallback
-    html += `
       <button class="download-btn-secondary" onclick="copyLink('${primaryUrl}')">
         <span>🔗 Copy direct link</span>
         <span>→</span>
@@ -722,14 +814,10 @@
     `;
 
     if (extras.length > 0) {
-      html += `<p style="margin-top:14px; font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:0.05em;">ADDITIONAL ITEMS</p>`;
+      html += `<p style="margin-top:14px;font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.05em;">ADDITIONAL ITEMS</p>`;
       extras.forEach((item, i) => {
-        html += `
-          <a class="download-btn-secondary" href="${item.url}" download="${item.filename || `item_${i+2}`}" target="_blank" style="margin-top:8px;">
-            <span>⬇ Item ${i + 2}</span>
-            <span>→</span>
-          </a>
-        `;
+        html += `<a class="download-btn-secondary" href="${item.url}" download="${item.filename||`item_${i+2}`}" target="_blank">
+          <span>⬇ Item ${i+2}</span><span>→</span></a>`;
       });
     }
 
@@ -740,18 +828,16 @@
 
   function copyLink(url) {
     navigator.clipboard.writeText(url).then(() => {
-      showStatus('success', '✓ Direct link copied to clipboard! Paste it in your browser to download.');
+      showStatus('success', '✓ Link copied! Paste it in your browser to download.');
     }).catch(() => {
       prompt('Copy this link manually:', url);
     });
   }
 
-  // Enter key support
-  document.getElementById('urlInput').addEventListener('keydown', (e) => {
+  document.getElementById('urlInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') fetchVideo();
   });
 </script>
 
 </body>
 </html>
-
