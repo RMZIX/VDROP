@@ -1,1 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VDROP — Video Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a0f;
+      --surface:  #12121a;
+      --border:   #1e1e2e;
+      --accent:   #6c63ff;
+      --accent2:  #a78bfa;
+      --text:     #e8e8f0;
+      --muted:    #6b6b8a;
+      --success:  #34d399;
+      --error:    #f87171;
+      --radius:   14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW ── */
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      padding: 0 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── HEADER ── */
+    header {
+      margin-top: 72px;
+      text-align: center;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    h1 {
+      font-size: clamp(38px, 8vw, 64px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ── PLATFORMS ── */
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 28px;
+    }
+
+    .platform-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+
+    /* ── INPUT CARD ── */
+    .card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-top: 48px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .url-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-input::placeholder { color: var(--muted); }
+
+    .url-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-fetch {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 22px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-fetch:hover { background: #7c75ff; transform: translateY(-1px); }
+    .btn-fetch:active { transform: translateY(0); }
+    .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* OPTIONS ROW */
+    .options-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .select-wrap {
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .select-wrap label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    select:focus { border-color: var(--accent); }
+
+    /* ── STATUS ── */
+    .status {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .status.visible { display: block; }
+
+    .status-inner {
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .status-inner.loading {
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: var(--accent2);
+    }
+
+    .status-inner.error {
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.25);
+      color: var(--error);
+    }
+
+    .status-inner.success {
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.2);
+      color: var(--success);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(108,99,255,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULT ── */
+    .result-card {
+      display: none;
+      margin-top: 20px;
+      border-radius: 12px;
+      background: var(--bg);
+      border: 1px solid rgba(52,211,153,0.2);
+      overflow: hidden;
+    }
+
+    .result-card.visible { display: block; }
+
+    .result-header {
+      padding: 14px 18px;
+      background: rgba(52,211,153,0.06);
+      border-bottom: 1px solid rgba(52,211,153,0.1);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--success);
+      text-transform: uppercase;
+    }
+
+    .result-body { padding: 18px; }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: 10px;
+    }
+
+    .download-btn:hover { background: #7c75ff; transform: translateY(-1px); }
+
+    .download-btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .download-btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .btn-arrow { font-size: 18px; }
+
+    /* ── HOW IT WORKS ── */
+    .how {
+      width: 100%;
+      margin-top: 64px;
+    }
+
+    .how-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .step-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.4;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 80px;
+      padding: 24px 20px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    footer a { color: var(--accent2); text-decoration: none; }
+
+    /* ── PASTE HINT ── */
+    .paste-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    kbd {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+    }
+
+    @media (max-width: 520px) {
+      .input-row { flex-direction: column; }
+      .steps { grid-template-columns: 1fr; }
+      .options-row { flex-direction: column; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span class="logo-dot"></span>
+      VDROP
+    </div>
+    <h1>Download<br/>Any Video</h1>
+    <p class="subtitle">Paste a link from any platform and get the highest quality video — no login, no watermark, no limits.</p>
+
+    <div class="platforms">
+      <span class="platform-tag">YouTube</span>
+      <span class="platform-tag">TikTok</span>
+      <span class="platform-tag">Instagram</span>
+      <span class="platform-tag">Twitter / X</span>
+      <span class="platform-tag">Reddit</span>
+      <span class="platform-tag">Vimeo</span>
+      <span class="platform-tag">Twitch</span>
+      <span class="platform-tag">Pinterest</span>
+      <span class="platform-tag">SoundCloud</span>
+      <span class="platform-tag">+ more</span>
+    </div>
+  </header>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+    <div class="input-row">
+      <input
+        class="url-input"
+        id="urlInput"
+        type="url"
+        placeholder="https://www.youtube.com/watch?v=..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="btn-fetch" id="fetchBtn" onclick="fetchVideo()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Fetch
+      </button>
+    </div>
+
+    <div class="paste-hint">
+      <kbd>Ctrl</kbd>+<kbd>V</kbd> to paste — then hit Fetch
+    </div>
+
+    <div class="options-row">
+      <div class="select-wrap">
+        <label>Quality</label>
+        <select id="qualitySelect">
+          <option value="max">Max (Best Available)</option>
+          <option value="2160">4K — 2160p</option>
+          <option value="1440">QHD — 1440p</option>
+          <option value="1080">Full HD — 1080p</option>
+          <option value="720">HD — 720p</option>
+          <option value="480">SD — 480p</option>
+          <option value="360">Low — 360p</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <label>Mode</label>
+        <select id="modeSelect">
+          <option value="auto">Auto (Video + Audio)</option>
+          <option value="audio">Audio Only (MP3)</option>
+          <option value="mute">Video Only (No Audio)</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <label>Format</label>
+        <select id="formatSelect">
+          <option value="mp4">MP4</option>
+          <option value="webm">WebM</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status" id="statusBox">
+      <div class="status-inner" id="statusInner"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-card" id="resultCard">
+      <div class="result-header">✓ Ready to download</div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how">
+    <div class="how-label">How it works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Copy the link</div>
+        <div class="step-desc">Grab any video URL from your platform of choice</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Choose quality</div>
+        <div class="step-desc">Select resolution, format, and video or audio mode</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Download</div>
+        <div class="step-desc">Hit Fetch and save the file directly to your device</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Powered by <a href="https://cobalt.tools" target="_blank">cobalt.tools</a> API &nbsp;·&nbsp;
+  No data stored &nbsp;·&nbsp; Open source on <a href="https://github.com" target="_blank">GitHub</a>
+</footer>
+
+<script>
+  const COBALT_API = 'https://api.cobalt.tools';
+
+  // Auto-paste from clipboard on load if URL detected
+  document.getElementById('urlInput').addEventListener('focus', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text.startsWith('http') && !document.getElementById('urlInput').value) {
+        document.getElementById('urlInput').value = text;
+      }
+    } catch (e) {}
+  });
+
+  async function fetchVideo() {
+    const url = document.getElementById('urlInput').value.trim();
+    const quality = document.getElementById('qualitySelect').value;
+    const mode = document.getElementById('modeSelect').value;
+    const vFormat = document.getElementById('formatSelect').value;
+    const btn = document.getElementById('fetchBtn');
+
+    if (!url) {
+      showStatus('error', '✕ Please paste a video URL first.');
+      return;
+    }
+
+    if (!url.startsWith('http')) {
+      showStatus('error', '✕ That doesn\'t look like a valid URL. Make sure it starts with https://');
+      return;
+    }
+
+    hideResult();
+    btn.disabled = true;
+    showStatus('loading', 'Fetching video link...');
+
+    const body = {
+      url,
+      videoQuality: quality === 'max' ? 'max' : quality,
+      youtubeVideoCodec: vFormat === 'webm' ? 'vp9' : 'h264',
+      downloadMode: mode,
+      filenameStyle: 'pretty',
+      disableMetadata: false,
+    };
+
+    try {
+      const res = await fetch(`${COBALT_API}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.status === 'error') {
+        const msg = data?.error?.code || data?.text || 'Could not process this URL.';
+        showStatus('error', `✕ ${friendlyError(msg)}`);
+        btn.disabled = false;
+        return;
+      }
+
+      if (data.status === 'redirect' || data.status === 'stream') {
+        showStatus('success', '✓ Link resolved successfully.');
+        showResult(data.url, data.filename || getFilename(url, mode, vFormat));
+      } else if (data.status === 'picker') {
+        // Multiple streams (e.g. Twitter with multiple videos)
+        showStatus('success', `✓ Found ${data.picker.length} media items. Showing best option.`);
+        showResult(data.picker[0].url, data.picker[0].filename || getFilename(url, mode, vFormat), data.picker.slice(1));
+      } else if (data.status === 'tunnel') {
+        showStatus('success', '✓ Tunnel stream ready.');
+        showResult(data.url, data.filename || getFilename(url, mode, vFormat));
+      } else {
+        showStatus('error', '✕ Unexpected response from server. Try a different URL or quality.');
+      }
+
+    } catch (err) {
+      if (err.message?.includes('fetch')) {
+        showStatus('error', '✕ Network error. Make sure you\'re online, or the Cobalt API may be temporarily down.');
+      } else {
+        showStatus('error', `✕ Error: ${err.message}`);
+      }
+    }
+
+    btn.disabled = false;
+  }
+
+  function friendlyError(code) {
+    const map = {
+      'content.too_long': 'The video is too long to process.',
+      'content.video.unavailable': 'This video is unavailable or private.',
+      'fetch.fail': 'Couldn\'t reach this URL. It may be private or region-locked.',
+      'link.unsupported': 'This platform isn\'t supported yet.',
+      'api.rate_exceeded': 'Too many requests. Wait a moment and try again.',
+      'content.post.unavailable': 'This post is unavailable.',
+    };
+    return map[code] || code;
+  }
+
+  function getFilename(url, mode, format) {
+    const ext = mode === 'audio' ? 'mp3' : format;
+    return `vdrop_download.${ext}`;
+  }
+
+  function showStatus(type, message) {
+    const box = document.getElementById('statusBox');
+    const inner = document.getElementById('statusInner');
+
+    box.classList.add('visible');
+    inner.className = `status-inner ${type}`;
+
+    if (type === 'loading') {
+      inner.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
+    } else {
+      inner.innerHTML = `<span>${message}</span>`;
+    }
+  }
+
+  function hideResult() {
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('resultBody').innerHTML = '';
+  }
+
+  function showResult(primaryUrl, filename, extras = []) {
+    const card = document.getElementById('resultCard');
+    const body = document.getElementById('resultBody');
+
+    let html = `
+      <a class="download-btn" href="${primaryUrl}" download="${filename}" target="_blank">
+        <span>⬇ Download — ${filename}</span>
+        <span class="btn-arrow">↗</span>
+      </a>
+    `;
+
+    // If browser blocks direct download (cross-origin), show copy link fallback
+    html += `
+      <button class="download-btn-secondary" onclick="copyLink('${primaryUrl}')">
+        <span>🔗 Copy direct link</span>
+        <span>→</span>
+      </button>
+    `;
+
+    if (extras.length > 0) {
+      html += `<p style="margin-top:14px; font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:0.05em;">ADDITIONAL ITEMS</p>`;
+      extras.forEach((item, i) => {
+        html += `
+          <a class="download-btn-secondary" href="${item.url}" download="${item.filename || `item_${i+2}`}" target="_blank" style="margin-top:8px;">
+            <span>⬇ Item ${i + 2}</span>
+            <span>→</span>
+          </a>
+        `;
+      });
+    }
+
+    body.innerHTML = html;
+    card.classList.add('visible');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      showStatus('success', '✓ Direct link copied to clipboard! Paste it in your browser to download.');
+    }).catch(() => {
+      prompt('Copy this link manually:', url);
+    });
+  }
+
+  // Enter key support
+  document.getElementById('urlInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') fetchVideo();
+  });
+</script>
+
+</body>
+</html>
 
